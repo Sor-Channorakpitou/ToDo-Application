@@ -2,9 +2,22 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { TodosModule } from './todos/todos.module.js';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [TodosModule],
+  imports: [
+    TodosModule, 
+    TypeOrmModule.forRoot({
+    type: "postgres",
+    host: "localhost",
+    port: 5432,
+    username: "postgres",
+    password: "postgres",
+    database: "todo",
+    autoLoadEntities: true,
+    synchronize: false,
+  }),
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
