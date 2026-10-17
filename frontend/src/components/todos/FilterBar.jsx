@@ -1,14 +1,6 @@
 import { Search } from 'lucide-react';
 import { STATUSES } from './statuses';
 
-/**
- * FilterBar Component
- *
- * Props Down / Callbacks Up:
- * - Receives currentFilter, per-status counts and search text from TodoApp.
- * - Renders status tabs (All / To Do / In Progress / Done) and a title search box.
- * - Reports changes via onFilterChange and onSearchChange callbacks.
- */
 export default function FilterBar({
   currentFilter,
   onFilterChange,

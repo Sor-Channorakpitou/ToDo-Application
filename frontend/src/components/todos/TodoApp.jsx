@@ -1,51 +1,72 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AddTodo from './AddTodo';
 import TodoList from './TodoList';
 import FilterBar from './FilterBar';
 import BulkActions from './BulkActions';
-import { ListChecks } from 'lucide-react';
+import { ListChecks, AlertTriangle } from 'lucide-react';
 import { STATUSES } from './statuses';
+import { getTodos, createTodo, updateTodo, deleteTodo } from '../../api/todos';
 
-/**
- * TodoApp Component (Lifted State Owner)
- *
- * Architectural Role:
- * - Single source of truth for `todos`, `filter`, `search` and `selectedIds` state.
- * - Each todo is { id, title, status, starred } where status is one of STATUSES.
- * - AddTodo, FilterBar, BulkActions and TodoList hold NO shared state; they talk only through:
- *    - Props down (todos, filter, search, counts, selection)
- *    - Callbacks up (onAddTodo, onUpdate, onDelete, onReorder, onToggleSelect, bulk actions...)
- */
 export default function TodoApp({ username }) {
-  const [todos, setTodos] = useState([
-    { id: 1, title: 'Install Node.js & Vite ecosystem', status: 'Done', starred: false },
-    { id: 2, title: 'Architect props-down/callbacks-up state', status: 'Done', starred: false },
-    { id: 3, title: 'Build full CRUD for todos', status: 'In Progress', starred: true },
-    { id: 4, title: 'Add an account/profile section', status: 'To Do', starred: false },
-    { id: 5, title: 'Get ready for the NestJS session', status: 'To Do', starred: true },
-  ]);
+  const [todos, setTodos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const [currentFilter, setCurrentFilter] = useState('All'); // 'All' | one of STATUSES
   const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState([]);
 
-  // Create
-  function handleAddTodo(title, status) {
-    const newTodo = { id: Date.now(), title, status, starred: false };
-    setTodos((prev) => [newTodo, ...prev]);
+  // Read: load all todos from the backend
+  async function loadTodos() {
+    try {
+      const data = await getTodos();
+      setTodos(data);
+      setError('');
+    } catch (err) {
+      setError(err.message);
+    }
+    setLoading(false);
   }
 
-  // Update (title, status or starred)
-  function handleUpdateTodo(id, changes) {
-    setTodos((prev) =>
-      prev.map((todo) => (todo.id === id ? { ...todo, ...changes } : todo))
-    );
+  // Load the todos once, when the page first opens
+  useEffect(() => {
+    getTodos()
+      .then((data) => setTodos(data))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Create
+  async function handleAddTodo(title, status) {
+    try {
+      const newTodo = await createTodo(title, status);
+      setTodos((prev) => [newTodo, ...prev]);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  // Update (title or status)
+  async function handleUpdateTodo(id, changes) {
+    try {
+      await updateTodo(id, changes);
+      setTodos((prev) =>
+        prev.map((todo) => (todo.id === id ? { ...todo, ...changes } : todo))
+      );
+    } catch (err) {
+      setError(err.message);
+    }
   }
 
   // Delete
-  function handleDeleteTodo(id) {
-    setTodos((prev) => prev.filter((todo) => todo.id !== id));
-    setSelectedIds((prev) => prev.filter((selectedId) => selectedId !== id));
+  async function handleDeleteTodo(id) {
+    try {
+      await deleteTodo(id);
+      setTodos((prev) => prev.filter((todo) => todo.id !== id));
+      setSelectedIds((prev) => prev.filter((selectedId) => selectedId !== id));
+    } catch (err) {
+      setError(err.message);
+    }
   }
 
   // Drag and drop reorder: move the dragged todo to the position of the target todo
@@ -77,16 +98,34 @@ export default function TodoApp({ username }) {
     );
   }
 
-  function handleBulkDelete() {
-    setTodos((prev) => prev.filter((todo) => !selectedIds.includes(todo.id)));
-    setSelectedIds([]);
+  async function handleBulkDelete() {
+    try {
+      // Delete the selected todos one by one
+      for (const id of selectedIds) {
+        await deleteTodo(id);
+      }
+      setTodos((prev) => prev.filter((todo) => !selectedIds.includes(todo.id)));
+      setSelectedIds([]);
+    } catch (err) {
+      setError(err.message);
+      loadTodos(); // reload so the list matches the backend
+    }
   }
 
-  function handleBulkStatus(status) {
-    setTodos((prev) =>
-      prev.map((todo) => (selectedIds.includes(todo.id) ? { ...todo, status } : todo))
-    );
-    setSelectedIds([]);
+  async function handleBulkStatus(status) {
+    try {
+      // Update the selected todos one by one
+      for (const id of selectedIds) {
+        await updateTodo(id, { status: status });
+      }
+      setTodos((prev) =>
+        prev.map((todo) => (selectedIds.includes(todo.id) ? { ...todo, status } : todo))
+      );
+      setSelectedIds([]);
+    } catch (err) {
+      setError(err.message);
+      loadTodos(); // reload so the list matches the backend
+    }
   }
 
   // Derived computations (Props down to children)
@@ -113,10 +152,21 @@ export default function TodoApp({ username }) {
           <h1 className="page-title">Tasks & Priorities</h1>
         </div>
         <p className="page-subtitle">
-          Welcome back, <strong>@{username}</strong>! You have {counts['To Do']} to do and{' '}
+          Welcome back{username && <>, <strong>@{username}</strong></>}! You have {counts['To Do']} to do and{' '}
           {counts['In Progress']} in progress.
         </p>
       </div>
+
+      {error && (
+        <div className="error-box" role="alert">
+          <AlertTriangle size={28} className="error-icon" />
+          <h2 className="error-title">Something went wrong</h2>
+          <p className="error-desc">{error}</p>
+          <button type="button" className="btn btn-primary" onClick={loadTodos}>
+            Retry
+          </button>
+        </div>
+      )}
 
       <div className="glass-card">
         {/* Child 1: AddTodo - Props down / Callbacks up */}
@@ -144,16 +194,22 @@ export default function TodoApp({ username }) {
 
       <div className="glass-card" style={{ padding: '1rem' }}>
         {/* Child 4: TodoList - Props down / Callbacks up */}
-        <TodoList
-          todos={filteredTodos}
-          selectedIds={selectedIds}
-          onUpdate={handleUpdateTodo}
-          onDelete={handleDeleteTodo}
-          onReorder={handleReorder}
-          onToggleSelect={handleToggleSelect}
-          currentFilter={currentFilter}
-          search={search}
-        />
+        {loading && (
+          <p className="empty-desc" style={{ textAlign: 'center' }}>Loading tasks...</p>
+        )}
+
+        {!loading && (
+          <TodoList
+            todos={filteredTodos}
+            selectedIds={selectedIds}
+            onUpdate={handleUpdateTodo}
+            onDelete={handleDeleteTodo}
+            onReorder={handleReorder}
+            onToggleSelect={handleToggleSelect}
+            currentFilter={currentFilter}
+            search={search}
+          />
+        )}
       </div>
     </div>
   );

@@ -2,14 +2,6 @@ import { useState } from 'react';
 import { PlusCircle } from 'lucide-react';
 import { STATUSES } from './statuses';
 
-/**
- * AddTodo Component
- *
- * Props Down / Callbacks Up:
- * - Does NOT own the todos state array.
- * - Owns only its local title and status field buffers.
- * - Calls onAddTodo(title, status) callback up to the parent when submitted.
- */
 export default function AddTodo({ onAddTodo }) {
   const [inputText, setInputText] = useState('');
   const [status, setStatus] = useState(STATUSES[0]);
