@@ -1184,10 +1184,6 @@ body {
   opacity: 0.4;
 }
 
-.todo-item.starred {
-  border-left: 3px solid var(--warning);
-}
-
 .drag-handle {
   display: flex;
   color: var(--text-faint);
@@ -1212,11 +1208,6 @@ body {
   font-family: inherit;
   font-size: 0.95rem;
   outline: none;
-}
-
-.btn-icon-star.active,
-.btn-icon-star:hover {
-  color: var(--warning);
 }
 
 /* Profile page */

@@ -1,15 +1,6 @@
 import { useState } from 'react';
 import { UserCircle, Save, CheckCircle2 } from 'lucide-react';
 
-/**
- * ProfilePage Component
- *
- * Props Down / Callbacks Up:
- * - Receives the current profile from App (the owner of profile state).
- * - Owns only a local draft of the form fields.
- * - Calls onSave(profile) up to App when the form is submitted, which
- *   updates the username shown in the navbar and on the todo page.
- */
 export default function ProfilePage({ profile, onSave }) {
   const [draft, setDraft] = useState(profile);
   const [saved, setSaved] = useState(false);
@@ -33,10 +24,11 @@ export default function ProfilePage({ profile, onSave }) {
 
   const initials = profile.name
     .split(' ')
+    .filter(Boolean)
     .map((part) => part[0])
     .join('')
     .slice(0, 2)
-    .toUpperCase();
+    .toUpperCase() || '?';
 
   return (
     <div className="todo-container">
@@ -51,9 +43,13 @@ export default function ProfilePage({ profile, onSave }) {
       <div className="glass-card profile-summary">
         <div className="user-profile-avatar">{initials}</div>
         <div>
-          <h2 className="profile-name">{profile.name}</h2>
-          <p className="user-username">@{profile.username}</p>
-          <p className="profile-meta">{profile.role} &middot; {profile.email}</p>
+          <h2 className="profile-name">{profile.name || 'No profile yet'}</h2>
+          {profile.username && <p className="user-username">@{profile.username}</p>}
+          {(profile.role || profile.email) && (
+            <p className="profile-meta">
+              {[profile.role, profile.email].filter(Boolean).join(' · ')}
+            </p>
+          )}
         </div>
       </div>
 

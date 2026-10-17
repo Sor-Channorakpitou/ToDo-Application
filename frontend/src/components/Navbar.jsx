@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { CheckSquare, Users, Sparkles, Sun, Moon, UserCircle } from 'lucide-react';
-import LiveTracker from './LiveTracker';
+import { CheckSquare, Sparkles, Sun, Moon, UserCircle } from 'lucide-react';
 
 export default function Navbar({ username }) {
   const [theme, setTheme] = useState(() => {
@@ -42,17 +41,6 @@ export default function Navbar({ username }) {
             </li>
             <li>
               <NavLink
-                to="/users"
-                className={({ isActive }) =>
-                  `nav-item ${isActive ? 'active' : ''}`
-                }
-              >
-                <Users size={16} className="nav-icon" />
-                <span>User Directory</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
                 to="/profile"
                 className={({ isActive }) =>
                   `nav-item ${isActive ? 'active' : ''}`
@@ -68,7 +56,7 @@ export default function Navbar({ username }) {
         <div className="nav-actions">
           <NavLink to="/profile" className="nav-username" title="Signed in user">
             <UserCircle size={16} />
-            <span>@{username}</span>
+            <span>{username ? `@${username}` : 'Set up profile'}</span>
           </NavLink>
 
           <button
@@ -80,8 +68,6 @@ export default function Navbar({ username }) {
           >
             {theme === 'light' ? <Moon size={17} /> : <Sun size={17} />}
           </button>
-
-          <LiveTracker />
         </div>
       </div>
     </header>

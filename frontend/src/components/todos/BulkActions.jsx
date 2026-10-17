@@ -1,14 +1,7 @@
 import { Trash2 } from 'lucide-react';
 import { STATUSES } from './statuses';
 
-/**
- * BulkActions Component
- *
- * Props Down / Callbacks Up:
- * - Receives the selection count from TodoApp (which owns selectedIds).
- * - Select-all toggles every visible todo via onSelectAll(boolean).
- * - Applies bulk delete / bulk status change via onBulkDelete and onBulkStatus(status).
- */
+
 export default function BulkActions({
   selectedCount,
   allVisibleSelected,

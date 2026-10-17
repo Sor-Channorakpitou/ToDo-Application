@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trash2, Inbox, Pencil, Check, X, Star, GripVertical } from 'lucide-react';
+import { Trash2, Inbox, Pencil, Check, X, GripVertical } from 'lucide-react';
 import { STATUSES } from './statuses';
 
 const STATUS_CLASS = {
@@ -8,14 +8,6 @@ const STATUS_CLASS = {
   Done: 'status-done',
 };
 
-/**
- * TodoList Component
- *
- * Props Down / Callbacks Up:
- * - Receives the filtered todos list and selection from parent TodoApp.
- * - Dispatches onUpdate, onDelete, onReorder and onToggleSelect callbacks up to parent.
- * - Only owns which item is being dragged; does not mutate todos directly.
- */
 export default function TodoList({
   todos,
   selectedIds,
@@ -108,7 +100,6 @@ function TodoItem({
     todo.status === 'Done' ? 'completed' : '',
     selected ? 'selected' : '',
     dragging ? 'dragging' : '',
-    todo.starred ? 'starred' : '',
   ].join(' ');
 
   return (
@@ -180,16 +171,6 @@ function TodoItem({
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
-        <button
-          type="button"
-          className={`btn-icon btn-icon-star ${todo.starred ? 'active' : ''}`}
-          onClick={() => onUpdate(todo.id, { starred: !todo.starred })}
-          aria-label={todo.starred ? `Unstar "${todo.title}"` : `Star "${todo.title}"`}
-          aria-pressed={todo.starred}
-          title={todo.starred ? 'Remove priority' : 'Mark as priority'}
-        >
-          <Star size={16} fill={todo.starred ? 'currentColor' : 'none'} />
-        </button>
         {!isEditing && (
           <button
             type="button"
