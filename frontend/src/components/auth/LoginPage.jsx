@@ -27,10 +27,12 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const targetPath = location.state?.from?.pathname;
+  const destination = targetPath && targetPath !== '/login' ? targetPath : '/todos';
+
   // If already logged in, redirect to todos
   if (user) {
-    const from = location.state?.from?.pathname || '/todos';
-    return <Navigate to={from} replace />;
+    return <Navigate to={destination} replace />;
   }
 
   async function handleSubmit(e) {
@@ -62,7 +64,6 @@ export default function LoginPage() {
       } else {
         await login(email, password);
       }
-      const destination = location.state?.from?.pathname || '/todos';
       navigate(destination, { replace: true });
     } catch (err) {
       const msg =

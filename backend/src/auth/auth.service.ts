@@ -74,12 +74,13 @@ export class AuthService {
 
     let isValid = false;
     try {
-      isValid = await argon2.verify(user.passwordHash, password);
+      if (user.passwordHash.startsWith('$argon2')) {
+        isValid = await argon2.verify(user.passwordHash, password);
+      } else {
+        isValid = await bcrypt.compare(password, user.passwordHash);
+      }
     } catch {
-      // Fallback for any legacy bcrypt hash during migration
-      isValid = await bcrypt
-        .compare(password, user.passwordHash)
-        .catch(() => false);
+      isValid = false;
     }
 
     if (!isValid) {
