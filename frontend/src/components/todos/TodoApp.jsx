@@ -6,8 +6,10 @@ import BulkActions from './BulkActions';
 import { ListChecks, AlertTriangle } from 'lucide-react';
 import { STATUSES } from './statuses';
 import { getTodos, createTodo, updateTodo, deleteTodo } from '../../api/todos';
+import { useAuth } from '../../context/useAuth';
 
 export default function TodoApp({ username }) {
+  const { user } = useAuth();
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -152,8 +154,12 @@ export default function TodoApp({ username }) {
           <h1 className="page-title">Tasks & Priorities</h1>
         </div>
         <p className="page-subtitle">
-          Welcome back{username && <>, <strong>@{username}</strong></>}! You have {counts['To Do']} to do and{' '}
-          {counts['In Progress']} in progress.
+          Welcome back,{' '}
+          <strong>
+            @{username || (user?.email ? user.email.split('@')[0] : 'user')}
+          </strong>
+          ! You have {counts['To Do'] || 0} to do and{' '}
+          {counts['In Progress'] || 0} in progress.
         </p>
       </div>
 
