@@ -1,4 +1,4 @@
-# JivitNhom
+# JivitNhom - Khmer Todo Application
 
 A full-stack task management application with role-based access control, secure authentication, and a responsive web interface.
 
