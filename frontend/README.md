@@ -1,4 +1,4 @@
-# NexusCore React Architecture App
+# JivitNhom - Tasks & Priorities App
 
 A production-grade React 19 application wiring together lifted unidirectional state, leak-free live effects with explicit cleanups, race-condition-resilient data fetching across all four UI states, and client-side routing via React Router v7.
 
