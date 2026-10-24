@@ -1,32 +1,57 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, HttpCode } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  HttpCode,
+} from '@nestjs/common';
 import { TodosService } from './todos.service.js';
 import { CreateTodoDto } from './dto/create-todo.dto.js';
 import { UpdateTodoDto } from './dto/update-todo.dto.js';
+import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
+import type { AuthUser } from '../auth/auth.types.js';
 
 @Controller('todos')
 export class TodosController {
   constructor(private readonly todosService: TodosService) {}
 
   @Get()
-  findAll() {
-    return this.todosService.findAll();
+  findAll(@CurrentUser() user: AuthUser) {
+    return this.todosService.findAll(user);
+  }
+
+  @Get(':id')
+  findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.todosService.findOne(id, user);
   }
 
   @Post()
-  create(@Body() dto: CreateTodoDto) {
-    return this.todosService.create(dto);          // 201 by default
+  create(@Body() dto: CreateTodoDto, @CurrentUser() user: AuthUser) {
+    return this.todosService.create(dto, user);
   }
 
-  //Update user by id
-  @Patch(":id")
-    update(@Param("id", ParseIntPipe) id: number, @Body() dto: UpdateTodoDto) {
-      return this.todosService.update(id, dto);
-    }
+  @Patch(':id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateTodoDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.todosService.update(id, dto, user);
+  }
 
-  // Delete user by id
-  @Delete(":id")
-    @HttpCode(204)
-    remove(@Param("id", ParseIntPipe) id: number) {
-      return this.todosService.remove(id);
-    }
+  @Delete(':id')
+  @HttpCode(204)
+  remove(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.todosService.remove(id, user);
+  }
 }
